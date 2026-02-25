@@ -1,42 +1,26 @@
 from aiogram import Router
 from aiogram.filters import CommandStart
-from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-
-from bot.fsm.session import set_user_language
-from bot.fsm.states import FoodBotStates
-from bot.services.language import detect_language
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def cmd_start(message: Message, state: FSMContext) -> None:
-    user_text = message.text or ""
-    language = detect_language(user_text)
-
-    await set_user_language(state, language)
-    await state.set_state(FoodBotStates.idle)
-
-    if language == "ru":
-        text = (
-            "Привет! 👋\n"
-            "Я бот-помощник по выбору блюд азиатской кухни.\n\n"
-            "Могу:\n"
-            "• помочь выбрать блюдо\n"
-            "• рассказать о конкретном блюде\n"
-            "• предложить похожие варианты\n\n"
-            "Напиши, что тебе хочется 🙂"
-        )
-    else:
-        text = (
-            "Привіт! 👋\n"
-            "Я бот-помічник з вибору страв азіатської кухні.\n\n"
-            "Можу:\n"
-            "• допомогти обрати страву\n"
-            "• розповісти про конкретну страву\n"
-            "• запропонувати схожі варіанти\n\n"
-            "Напиши, що тобі хочеться 🙂"
-        )
-
+async def cmd_start(message: Message) -> None:
+    text = (
+        "Привіт! 👋\n\n"
+        "Я — TsuPosh Food Bot, ваш помічник по меню мережі TsuPosh. "
+        "Допоможу швидко знайти щось смачне саме під ваш запит 🍜\n\n"
+        "Що я вмію:\n"
+        "• підібрати страви за смаком: гостре / не гостре / з куркою / з рибою / вегетаріанське\n"
+        "• уточнювати побажання простими питаннями (рис, локшина, суп, роли, закуска)\n"
+        "• розповісти про страву: що це, який смак і як її зазвичай готують\n"
+        "• перевірити, чи є позиція у меню, і якщо ні — запропонувати схожі варіанти\n\n"
+        "Приклади запитів:\n"
+        "• Хочу щось не гостре з куркою\n"
+        "• Порадь роли з рибою\n"
+        "• Розкажи про том ям\n"
+        "• А у вас є гедза з куркою?\n\n"
+        "Напишіть, що хочеться — і я підберу варіанти з меню TsuPosh 🙂"
+    )
     await message.answer(text)
