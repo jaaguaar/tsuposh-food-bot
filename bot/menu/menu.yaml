@@ -1,0 +1,1143 @@
+version: '1'
+title: TsuPosh Demo Menu
+dishes:
+- id: tom-yum-chicken
+  category: soups
+  name:
+    ua: Том Ям з куркою
+    ru: Том Ям с курицей
+  description_short:
+    ua: Ароматний кисло-гострий суп на кокосовій основі з куркою та грибами.
+    ru: Ароматный кисло-острый суп на кокосовой основе с курицей и грибами.
+  description_full:
+    ua: Том Ям — яскравий азійський суп із балансом кислинки, гостроти та насиченого аромату. Подається з куркою, грибами
+      та зеленню.
+    ru: Том Ям — яркий азиатский суп с балансом кислинки, остроты и насыщенного аромата. Подается с курицей, грибами и зеленью.
+  ingredients:
+  - курка
+  - гриби
+  - кокосове молоко
+  - лайм
+  - лемонграс
+  - перець чилі
+  tags:
+  - soup
+  - spicy
+  - chicken
+  - thai
+  - hot
+  spice_level: 2
+  is_vegetarian: false
+  allergens:
+  - soy
+  pair_with:
+    ua: рис жасмин або лимонад
+    ru: рис жасмин или лимонад
+  available: true
+- id: miso-soup
+  category: soups
+  name:
+    ua: Місо суп
+    ru: Мисо суп
+  description_short:
+    ua: Легкий японський суп з місо-пастою, тофу та водоростями.
+    ru: Легкий японский суп с мисо-пастой, тофу и водорослями.
+  description_full:
+    ua: Класичний місо суп має м’який солонуватий смак і чудово підходить як легкий старт до основної страви.
+    ru: Классический мисо суп имеет мягкий солоноватый вкус и отлично подходит как легкий старт к основному блюду.
+  ingredients:
+  - місо-паста
+  - тофу
+  - водорості вакаме
+  - зелена цибуля
+  tags:
+  - soup
+  - light
+  - japanese
+  - vegetarian
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - soy
+  pair_with:
+    ua: роли або легкий салат
+    ru: роллы или легкий салат
+  available: true
+- id: ramen-chicken
+  category: noodles
+  name:
+    ua: Рамен з куркою
+    ru: Рамен с курицей
+  description_short:
+    ua: Ситна локшина у бульйоні з куркою, яйцем та зеленню.
+    ru: Сытная лапша в бульоне с курицей, яйцом и зеленью.
+  description_full:
+    ua: Рамен — насичена страва з локшиною та бульйоном, яку люблять за глибокий смак і ситність. Добрий вибір, коли хочеться
+      чогось гарячого.
+    ru: Рамен — насыщенное блюдо с лапшой и бульоном, которое любят за глубокий вкус и сытность. Хороший выбор, когда хочется
+      чего-то горячего.
+  ingredients:
+  - локшина
+  - курка
+  - яйце
+  - бульйон
+  - зелена цибуля
+  tags:
+  - noodles
+  - soup-noodles
+  - chicken
+  - japanese
+  - hearty
+  spice_level: 1
+  is_vegetarian: false
+  allergens:
+  - soy
+  - gluten
+  - egg
+  pair_with:
+    ua: гедза або чай
+    ru: гедза или чай
+  available: true
+- id: pad-thai-shrimp
+  category: noodles
+  name:
+    ua: Пад Тай з креветкою
+    ru: Пад Тай с креветкой
+  description_short:
+    ua: Рисова локшина з креветкою, овочами та характерним солодко-кислим смаком.
+    ru: Рисовая лапша с креветкой, овощами и характерным сладко-кислым вкусом.
+  description_full:
+    ua: Пад Тай — популярна тайська страва з рисовою локшиною, обсмаженою з соусом, овочами та креветкою. Має яскравий, але
+      збалансований смак.
+    ru: Пад Тай — популярное тайское блюдо из рисовой лапши, обжаренной с соусом, овощами и креветкой. Имеет яркий, но сбалансированный
+      вкус.
+  ingredients:
+  - рисова локшина
+  - креветка
+  - морква
+  - паростки
+  - соус пад тай
+  - зелена цибуля
+  tags:
+  - noodles
+  - thai
+  - shrimp
+  - sweet-sour
+  - wok
+  spice_level: 1
+  is_vegetarian: false
+  allergens:
+  - soy
+  - shellfish
+  - peanuts
+  pair_with:
+    ua: лимонад або спрінг-роли
+    ru: лимонад или спринг-роллы
+  available: true
+- id: udon-beef-pepper
+  category: wok
+  name:
+    ua: Удон з яловичиною та перцем
+    ru: Удон с говядиной и перцем
+  description_short:
+    ua: Пшенична локшина удон з яловичиною, солодким перцем і соусом у стилі вок.
+    ru: Пшеничная лапша удон с говядиной, сладким перцем и соусом в стиле вок.
+  description_full:
+    ua: Ситна вок-страва з м’якою локшиною удон та яловичиною. Добрий варіант для тих, хто хоче щось поживне й не надто гостре.
+    ru: Сытное вок-блюдо с мягкой лапшой удон и говядиной. Хороший вариант для тех, кто хочет что-то питательное и не слишком
+      острое.
+  ingredients:
+  - удон
+  - яловичина
+  - солодкий перець
+  - цибуля
+  - соус теріякі
+  tags:
+  - wok
+  - noodles
+  - beef
+  - hearty
+  - teriyaki
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - soy
+  - gluten
+  pair_with:
+    ua: зелений чай
+    ru: зеленый чай
+  available: true
+- id: fried-rice-chicken
+  category: rice
+  name:
+    ua: Смажений рис з куркою
+    ru: Жареный рис с курицей
+  description_short:
+    ua: Класичний смажений рис з куркою, яйцем та овочами.
+    ru: Классический жареный рис с курицей, яйцом и овощами.
+  description_full:
+    ua: 'Проста й улюблена страва азійської кухні: рис обсмажується з куркою, яйцем та овочами, завдяки чому виходить ситно
+      й ароматно.'
+    ru: 'Простое и любимое блюдо азиатской кухни: рис обжаривается с курицей, яйцом и овощами, благодаря чему получается сытно
+      и ароматно.'
+  ingredients:
+  - рис
+  - курка
+  - яйце
+  - морква
+  - зелений горошок
+  - соєвий соус
+  tags:
+  - rice
+  - chicken
+  - hearty
+  - classic
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - soy
+  - egg
+  pair_with:
+    ua: місо суп
+    ru: мисо суп
+  available: true
+- id: poke-salmon
+  category: rice
+  name:
+    ua: Поке з лососем
+    ru: Поке с лососем
+  description_short:
+    ua: Легка боул-страва з рисом, лососем та свіжими овочами.
+    ru: Легкий боул с рисом, лососем и свежими овощами.
+  description_full:
+    ua: Поке — свіжий та легкий варіант із рисовою основою, рибою та овочами. Добре підходить, коли хочеться не дуже важкої
+      їжі.
+    ru: Поке — свежий и легкий вариант с рисовой основой, рыбой и овощами. Хорошо подходит, когда хочется не слишком тяжелой
+      еды.
+  ingredients:
+  - рис
+  - лосось
+  - огірок
+  - авокадо
+  - едамаме
+  - кунжут
+  tags:
+  - rice
+  - bowl
+  - salmon
+  - light
+  - fresh
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - fish
+  - soy
+  - sesame
+  pair_with:
+    ua: матча або лимонад
+    ru: матча или лимонад
+  available: true
+- id: california-roll
+  category: sushi_rolls
+  name:
+    ua: Рол Каліфорнія
+    ru: Ролл Калифорния
+  description_short:
+    ua: Популярний рол з рисом, крабовим міксом, огірком та авокадо.
+    ru: Популярный ролл с рисом, крабовым миксом, огурцом и авокадо.
+  description_full:
+    ua: Каліфорнія — один із найвідоміших ролів, м’який за смаком і добре підходить для знайомства з суші.
+    ru: Калифорния — один из самых известных роллов, мягкий по вкусу и хорошо подходит для знакомства с суши.
+  ingredients:
+  - рис
+  - норі
+  - крабовий мікс
+  - огірок
+  - авокадо
+  - кунжут
+  tags:
+  - sushi
+  - roll
+  - japanese
+  - classic
+  - mild
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - sesame
+  - egg
+  pair_with:
+    ua: місо суп
+    ru: мисо суп
+  available: true
+- id: spicy-tuna-roll
+  category: sushi_rolls
+  name:
+    ua: Гострий рол з тунцем
+    ru: Острый ролл с тунцом
+  description_short:
+    ua: Рол з тунцем та пікантним соусом для тих, хто любить гостреньке.
+    ru: Ролл с тунцом и пикантным соусом для тех, кто любит поострее.
+  description_full:
+    ua: Рол із тунцем та гострим соусом має більш виразний смак і підходить тим, хто вже любить суші та хоче яскравіших відчуттів.
+    ru: Ролл с тунцом и острым соусом имеет более выразительный вкус и подходит тем, кто уже любит суши и хочет более ярких
+      ощущений.
+  ingredients:
+  - рис
+  - норі
+  - тунець
+  - гострий соус
+  - огірок
+  tags:
+  - sushi
+  - roll
+  - tuna
+  - spicy
+  - japanese
+  spice_level: 2
+  is_vegetarian: false
+  allergens:
+  - fish
+  - soy
+  pair_with:
+    ua: зелений чай
+    ru: зеленый чай
+  available: true
+- id: spring-rolls-veg
+  category: snacks
+  name:
+    ua: Спрінг-роли овочеві
+    ru: Спринг-роллы овощные
+  description_short:
+    ua: Хрустка закуска з овочевою начинкою, добре пасує до соусів.
+    ru: Хрустящая закуска с овощной начинкой, хорошо сочетается с соусами.
+  description_full:
+    ua: Овочеві спрінг-роли — легка хрустка закуска, яку часто беруть як доповнення до супу або локшини.
+    ru: Овощные спринг-роллы — легкая хрустящая закуска, которую часто берут как дополнение к супу или лапше.
+  ingredients:
+  - тісто
+  - капуста
+  - морква
+  - цибуля
+  - соус
+  tags:
+  - snack
+  - crispy
+  - vegetarian
+  - starter
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - gluten
+  - soy
+  pair_with:
+    ua: солодкий чилі соус
+    ru: соус сладкий чили
+  available: true
+- id: gyoza-chicken
+  category: snacks
+  name:
+    ua: Гедза з куркою
+    ru: Гедза с курицей
+  description_short:
+    ua: Японські обсмажені пельмені з соковитою курячою начинкою.
+    ru: Японские обжаренные пельмени с сочной куриной начинкой.
+  description_full:
+    ua: Гедза — популярна закуска з тонкого тіста та м’ясної начинки. Зазвичай подаються гарячими з соусом.
+    ru: Гедза — популярная закуска из тонкого теста и мясной начинки. Обычно подаются горячими с соусом.
+  ingredients:
+  - тісто
+  - курка
+  - цибуля
+  - імбир
+  - соус
+  tags:
+  - snack
+  - dumplings
+  - chicken
+  - japanese
+  - hearty
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - gluten
+  - soy
+  pair_with:
+    ua: рамен або чай
+    ru: рамен или чай
+  available: true
+- id: mochi-mango
+  category: desserts
+  name:
+    ua: Моті манго
+    ru: Моти манго
+  description_short:
+    ua: Ніжний азійський десерт із м’якого рисового тіста з манговою начинкою.
+    ru: Нежный азиатский десерт из мягкого рисового теста с манговой начинкой.
+  description_full:
+    ua: Моті — легкий десерт із приємною текстурою. Манго додає солодкий фруктовий акцент.
+    ru: Моти — легкий десерт с приятной текстурой. Манго добавляет сладкий фруктовый акцент.
+  ingredients:
+  - рисове тісто
+  - манго
+  - крем
+  tags:
+  - dessert
+  - sweet
+  - mango
+  - light
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - milk
+  pair_with:
+    ua: чай жасмин
+    ru: чай жасмин
+  available: true
+- id: matcha-latte
+  category: drinks
+  name:
+    ua: Матча лате
+    ru: Матча латте
+  description_short:
+    ua: Ніжний напій з матчею та молоком, м’який і ароматний.
+    ru: Нежный напиток с матчей и молоком, мягкий и ароматный.
+  description_full:
+    ua: Матча лате має делікатний трав’янистий смак і добре підходить як до десертів, так і до легких страв.
+    ru: Матча латте имеет деликатный травянистый вкус и хорошо подходит как к десертам, так и к легким блюдам.
+  ingredients:
+  - матча
+  - молоко
+  tags:
+  - drink
+  - matcha
+  - warm
+  - light
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - milk
+  pair_with:
+    ua: моті
+    ru: моти
+  available: true
+- id: tom-kha-chicken
+  category: soups
+  name:
+    ua: Том Кха з куркою
+    ru: Том Кха с курицей
+  description_short:
+    ua: Ніжний кокосовий суп з куркою, грибами та ароматними спеціями.
+    ru: Нежный кокосовый суп с курицей, грибами и ароматными специями.
+  description_full:
+    ua: Том Кха — м’якіший за Том Ям тайський суп на кокосовому молоці з виразним ароматом лемонграсу та лайма.
+    ru: Том Кха — более мягкий, чем Том Ям, тайский суп на кокосовом молоке с ярким ароматом лемонграсса и лайма.
+  ingredients:
+  - курка
+  - гриби
+  - кокосове молоко
+  - лайм
+  - лемонграс
+  tags:
+  - soup
+  - thai
+  - chicken
+  - coconut
+  - mild
+  spice_level: 1
+  is_vegetarian: false
+  allergens:
+  - soy
+  pair_with:
+    ua: рис жасмин
+    ru: рис жасмин
+  available: true
+- id: kimchi-soup-tofu
+  category: soups
+  name:
+    ua: Кімчі суп з тофу
+    ru: Кимчи суп с тофу
+  description_short:
+    ua: Пряний суп з кімчі, тофу та овочами у корейському стилі.
+    ru: Пряный суп с кимчи, тофу и овощами в корейском стиле.
+  description_full:
+    ua: Ароматний суп з легкою кислинкою та помітною гостротою, добрий варіант для любителів корейських смаків.
+    ru: Ароматный суп с лёгкой кислинкой и заметной остротой, хороший вариант для любителей корейских вкусов.
+  ingredients:
+  - кімчі
+  - тофу
+  - бульйон
+  - зелена цибуля
+  - гриби
+  tags:
+  - soup
+  - korean
+  - spicy
+  - tofu
+  - vegetarian
+  spice_level: 2
+  is_vegetarian: true
+  allergens:
+  - soy
+  pair_with:
+    ua: рис або чай
+    ru: рис или чай
+  available: true
+- id: pho-beef
+  category: soups
+  name:
+    ua: Фо Бо з яловичиною
+    ru: Фо Бо с говядиной
+  description_short:
+    ua: В’єтнамський суп з рисовою локшиною, яловичиною та ароматним бульйоном.
+    ru: Вьетнамский суп с рисовой лапшой, говядиной и ароматным бульоном.
+  description_full:
+    ua: Фо Бо — легкий, але насичений суп з пряним бульйоном, зеленню та рисовою локшиною.
+    ru: Фо Бо — лёгкий, но насыщенный суп с пряным бульоном, зеленью и рисовой лапшой.
+  ingredients:
+  - яловичина
+  - рисова локшина
+  - бульйон
+  - кінза
+  - цибуля
+  tags:
+  - soup
+  - vietnamese
+  - beef
+  - noodles
+  - aromatic
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - soy
+  pair_with:
+    ua: лайм і гострий соус
+    ru: лайм и острый соус
+  available: true
+- id: yakisoba-chicken
+  category: noodles
+  name:
+    ua: Якісоба з куркою
+    ru: Якисоба с курицей
+  description_short:
+    ua: Обсмажена локшина з куркою, овочами та соусом у японському стилі.
+    ru: Обжаренная лапша с курицей, овощами и соусом в японском стиле.
+  description_full:
+    ua: Ситна страва з м’якою локшиною та солодкувато-солоним соусом, підходить для обіду або вечері.
+    ru: Сытное блюдо с мягкой лапшой и сладко-солёным соусом, подходит для обеда или ужина.
+  ingredients:
+  - локшина
+  - курка
+  - капуста
+  - морква
+  - соус якісоба
+  tags:
+  - noodles
+  - japanese
+  - chicken
+  - wok
+  - hearty
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - soy
+  - gluten
+  pair_with:
+    ua: матча або місо суп
+    ru: матча или мисо суп
+  available: true
+- id: udon-chicken-teriyaki
+  category: noodles
+  name:
+    ua: Удон з куркою теріякі
+    ru: Удон с курицей терияки
+  description_short:
+    ua: Удон з куркою та овочами у солодкуватому соусі теріякі.
+    ru: Удон с курицей и овощами в сладковатом соусе терияки.
+  description_full:
+    ua: М’яка пшенична локшина удон з куркою — хороший вибір, коли хочеться ситної, але не гострої страви.
+    ru: Мягкая пшеничная лапша удон с курицей — хороший выбор, когда хочется сытного, но не острого блюда.
+  ingredients:
+  - удон
+  - курка
+  - броколі
+  - морква
+  - соус теріякі
+  tags:
+  - noodles
+  - chicken
+  - teriyaki
+  - mild
+  - hearty
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - soy
+  - gluten
+  pair_with:
+    ua: зелений чай
+    ru: зелёный чай
+  available: true
+- id: glass-noodles-veg
+  category: noodles
+  name:
+    ua: Скляна локшина з овочами
+    ru: Стеклянная лапша с овощами
+  description_short:
+    ua: Легка страва зі скляною локшиною, овочами та кунжутом.
+    ru: Лёгкое блюдо со стеклянной лапшой, овощами и кунжутом.
+  description_full:
+    ua: Скляна локшина має делікатну текстуру і добре поєднується з хрусткими овочами та легким соусом.
+    ru: Стеклянная лапша имеет деликатную текстуру и хорошо сочетается с хрустящими овощами и лёгким соусом.
+  ingredients:
+  - скляна локшина
+  - морква
+  - перець
+  - капуста
+  - кунжут
+  - соєвий соус
+  tags:
+  - noodles
+  - vegetarian
+  - light
+  - wok
+  - sesame
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - soy
+  - sesame
+  pair_with:
+    ua: спрінг-роли
+    ru: спринг-роллы
+  available: true
+- id: ramen-spicy-beef
+  category: noodles
+  name:
+    ua: Гострий рамен з яловичиною
+    ru: Острый рамен с говядиной
+  description_short:
+    ua: Насичений рамен з яловичиною, чилі та ароматним бульйоном.
+    ru: Насыщенный рамен с говядиной, чили и ароматным бульоном.
+  description_full:
+    ua: Для тих, хто любить ситні супи з помітною гостротою та м’ясним смаком.
+    ru: Для тех, кто любит сытные супы с заметной остротой и мясным вкусом.
+  ingredients:
+  - локшина
+  - яловичина
+  - бульйон
+  - чилі
+  - яйце
+  - зелена цибуля
+  tags:
+  - noodles
+  - ramen
+  - beef
+  - spicy
+  - hearty
+  spice_level: 2
+  is_vegetarian: false
+  allergens:
+  - soy
+  - gluten
+  - egg
+  pair_with:
+    ua: гедза або лимонад
+    ru: гедза или лимонад
+  available: true
+- id: fried-rice-shrimp
+  category: rice
+  name:
+    ua: Смажений рис з креветкою
+    ru: Жареный рис с креветкой
+  description_short:
+    ua: Смажений рис з креветкою, яйцем та овочами у швидкому вок-стилі.
+    ru: Жареный рис с креветкой, яйцом и овощами в быстром вок-стиле.
+  description_full:
+    ua: Ароматний рис із морським акцентом, добре підходить тим, хто хоче ситну, але не важку страву.
+    ru: Ароматный рис с морским акцентом, хорошо подходит тем, кто хочет сытное, но не тяжёлое блюдо.
+  ingredients:
+  - рис
+  - креветка
+  - яйце
+  - морква
+  - зелений горошок
+  - соєвий соус
+  tags:
+  - rice
+  - shrimp
+  - wok
+  - classic
+  - seafood
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - soy
+  - egg
+  - shellfish
+  pair_with:
+    ua: місо суп
+    ru: мисо суп
+  available: true
+- id: kimchi-rice-beef
+  category: rice
+  name:
+    ua: Кімчі рис з яловичиною
+    ru: Кимчи рис с говядиной
+  description_short:
+    ua: Пікантний рис з яловичиною та кімчі у корейському стилі.
+    ru: Пикантный рис с говядиной и кимчи в корейском стиле.
+  description_full:
+    ua: Страва з помітною гостротою та кислинкою кімчі, для тих, хто хоче яскравого смаку.
+    ru: Блюдо с заметной остротой и кислинкой кимчи, для тех, кто хочет яркого вкуса.
+  ingredients:
+  - рис
+  - яловичина
+  - кімчі
+  - цибуля
+  - кунжут
+  - соєвий соус
+  tags:
+  - rice
+  - korean
+  - beef
+  - spicy
+  - kimchi
+  spice_level: 2
+  is_vegetarian: false
+  allergens:
+  - soy
+  - sesame
+  pair_with:
+    ua: лимонад
+    ru: лимонад
+  available: true
+- id: tofu-buddha-bowl
+  category: rice
+  name:
+    ua: Боул з тофу та овочами
+    ru: Боул с тофу и овощами
+  description_short:
+    ua: Легкий рисовий боул з тофу, овочами та кунжутною заправкою.
+    ru: Лёгкий рисовый боул с тофу, овощами и кунжутной заправкой.
+  description_full:
+    ua: Свіжий вегетаріанський боул, зручний вибір для легкого та збалансованого прийому їжі.
+    ru: Свежий вегетарианский боул, удобный выбор для лёгкого и сбалансированного приёма пищи.
+  ingredients:
+  - рис
+  - тофу
+  - огірок
+  - морква
+  - едамаме
+  - кунжутний соус
+  tags:
+  - rice
+  - bowl
+  - vegetarian
+  - tofu
+  - light
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - soy
+  - sesame
+  pair_with:
+    ua: матча лате
+    ru: матча латте
+  available: true
+- id: wok-chicken-cashew
+  category: wok
+  name:
+    ua: Вок з куркою та кеш’ю
+    ru: Вок с курицей и кешью
+  description_short:
+    ua: Курка з овочами та кеш’ю у соусі в стилі тайського воку.
+    ru: Курица с овощами и кешью в соусе в стиле тайского вока.
+  description_full:
+    ua: Ситна страва з м’якою куркою, хрусткими овочами та горіховими нотками кеш’ю.
+    ru: Сытное блюдо с мягкой курицей, хрустящими овощами и ореховыми нотками кешью.
+  ingredients:
+  - курка
+  - перець
+  - цибуля
+  - кеш’ю
+  - соус
+  - часник
+  tags:
+  - wok
+  - chicken
+  - nuts
+  - hearty
+  - thai
+  spice_level: 1
+  is_vegetarian: false
+  allergens:
+  - soy
+  - nuts
+  pair_with:
+    ua: рис жасмин
+    ru: рис жасмин
+  available: true
+- id: wok-tofu-broccoli
+  category: wok
+  name:
+    ua: Вок з тофу та броколі
+    ru: Вок с тофу и брокколи
+  description_short:
+    ua: Тофу, броколі та овочі в легкому соєвому соусі.
+    ru: Тофу, брокколи и овощи в лёгком соевом соусе.
+  description_full:
+    ua: Вегетаріанський вок із ніжним тофу та хрусткими овочами — легкий і збалансований варіант.
+    ru: Вегетарианский вок с нежным тофу и хрустящими овощами — лёгкий и сбалансированный вариант.
+  ingredients:
+  - тофу
+  - броколі
+  - морква
+  - перець
+  - соєвий соус
+  tags:
+  - wok
+  - vegetarian
+  - tofu
+  - light
+  - broccoli
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - soy
+  pair_with:
+    ua: рис або чай
+    ru: рис или чай
+  available: true
+- id: wok-shrimp-garlic
+  category: wok
+  name:
+    ua: Вок з креветкою та часником
+    ru: Вок с креветкой и чесноком
+  description_short:
+    ua: Креветка з овочами у ароматному часниковому соусі.
+    ru: Креветка с овощами в ароматном чесночном соусе.
+  description_full:
+    ua: Швидка вок-страва з морепродуктами та яскравим ароматом часнику, добре поєднується з рисом.
+    ru: Быстрое вок-блюдо с морепродуктами и ярким ароматом чеснока, хорошо сочетается с рисом.
+  ingredients:
+  - креветка
+  - часник
+  - перець
+  - цибуля
+  - соус
+  tags:
+  - wok
+  - shrimp
+  - garlic
+  - seafood
+  - aromatic
+  spice_level: 1
+  is_vegetarian: false
+  allergens:
+  - soy
+  - shellfish
+  pair_with:
+    ua: рис жасмин
+    ru: рис жасмин
+  available: true
+- id: salmon-avocado-roll
+  category: sushi_rolls
+  name:
+    ua: Рол з лососем та авокадо
+    ru: Ролл с лососем и авокадо
+  description_short:
+    ua: Ніжний рол з лососем, авокадо та рисом.
+    ru: Нежный ролл с лососем, авокадо и рисом.
+  description_full:
+    ua: М’який за смаком рол, який часто обирають ті, хто любить рибу без зайвої гостроти.
+    ru: Мягкий по вкусу ролл, который часто выбирают те, кто любит рыбу без лишней остроты.
+  ingredients:
+  - рис
+  - норі
+  - лосось
+  - авокадо
+  tags:
+  - sushi
+  - roll
+  - salmon
+  - mild
+  - classic
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - fish
+  pair_with:
+    ua: місо суп або чай
+    ru: мисо суп или чай
+  available: true
+- id: eel-cream-cheese-roll
+  category: sushi_rolls
+  name:
+    ua: Рол з вугрем та крем-сиром
+    ru: Ролл с угрём и крем-сыром
+  description_short:
+    ua: Насичений рол з вугрем, крем-сиром та соусом унагі.
+    ru: Насыщенный ролл с угрём, крем-сыром и соусом унаги.
+  description_full:
+    ua: Ситніший рол з солодкуватим смаком соусу унагі, підходить для поціновувачів виразних ролів.
+    ru: Более сытный ролл со сладковатым вкусом соуса унаги, подходит для ценителей выразительных роллов.
+  ingredients:
+  - рис
+  - норі
+  - вугор
+  - крем-сир
+  - соус унагі
+  tags:
+  - sushi
+  - roll
+  - eel
+  - rich
+  - japanese
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - fish
+  - milk
+  - soy
+  pair_with:
+    ua: зелений чай
+    ru: зелёный чай
+  available: true
+- id: vegan-avocado-cucumber-roll
+  category: sushi_rolls
+  name:
+    ua: Веган рол з авокадо та огірком
+    ru: Веган ролл с авокадо и огурцом
+  description_short:
+    ua: Легкий рол з овочами без риби та м’яса.
+    ru: Лёгкий ролл с овощами без рыбы и мяса.
+  description_full:
+    ua: Простий і свіжий рол для тих, хто шукає вегетаріанський або легкий варіант.
+    ru: Простой и свежий ролл для тех, кто ищет вегетарианский или лёгкий вариант.
+  ingredients:
+  - рис
+  - норі
+  - авокадо
+  - огірок
+  - кунжут
+  tags:
+  - sushi
+  - roll
+  - vegetarian
+  - vegan
+  - light
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - sesame
+  pair_with:
+    ua: місо суп
+    ru: мисо суп
+  available: true
+- id: tempura-shrimp
+  category: snacks
+  name:
+    ua: Темпура креветки
+    ru: Темпура креветки
+  description_short:
+    ua: Хрусткі креветки у легкому клярі, подаються гарячими.
+    ru: Хрустящие креветки в лёгком кляре, подаются горячими.
+  description_full:
+    ua: Популярна японська закуска з морепродуктів у хрусткій темпурній скоринці.
+    ru: Популярная японская закуска из морепродуктов в хрустящей темпурной корочке.
+  ingredients:
+  - креветка
+  - кляр
+  - олія
+  - соус
+  tags:
+  - snack
+  - tempura
+  - shrimp
+  - crispy
+  - japanese
+  spice_level: 0
+  is_vegetarian: false
+  allergens:
+  - gluten
+  - shellfish
+  - egg
+  pair_with:
+    ua: гострий соус або чай
+    ru: острый соус или чай
+  available: true
+- id: edamame-sea-salt
+  category: snacks
+  name:
+    ua: Едамаме з морською сіллю
+    ru: Эдамаме с морской солью
+  description_short:
+    ua: Легка закуска з відварених бобів едамаме та морської солі.
+    ru: Лёгкая закуска из отварных бобов эдамаме и морской соли.
+  description_full:
+    ua: Проста й корисна закуска, яку зручно замовляти як доповнення до ролів або супу.
+    ru: Простая и полезная закуска, которую удобно заказывать как дополнение к роллам или супу.
+  ingredients:
+  - едамаме
+  - морська сіль
+  tags:
+  - snack
+  - vegetarian
+  - vegan
+  - light
+  - healthy
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - soy
+  pair_with:
+    ua: роли або матча
+    ru: роллы или матча
+  available: true
+- id: gyoza-veg
+  category: snacks
+  name:
+    ua: Гедза овочева
+    ru: Гедза овощная
+  description_short:
+    ua: Обсмажені японські пельмені з овочевою начинкою.
+    ru: Обжаренные японские пельмени с овощной начинкой.
+  description_full:
+    ua: Вегетаріанська версія гедза з хрусткою скоринкою та соковитою овочевою начинкою.
+    ru: Вегетарианская версия гедза с хрустящей корочкой и сочной овощной начинкой.
+  ingredients:
+  - тісто
+  - капуста
+  - морква
+  - цибуля
+  - імбир
+  tags:
+  - snack
+  - dumplings
+  - vegetarian
+  - japanese
+  - hearty
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - gluten
+  - soy
+  pair_with:
+    ua: рамен або чай
+    ru: рамен или чай
+  available: true
+- id: mochi-coconut
+  category: desserts
+  name:
+    ua: Моті кокос
+    ru: Моти кокос
+  description_short:
+    ua: М’який десерт моті з ніжною кокосовою начинкою.
+    ru: Мягкий десерт моти с нежной кокосовой начинкой.
+  description_full:
+    ua: Легкий десерт із характерною текстурою моті та м’яким кокосовим смаком.
+    ru: Лёгкий десерт с характерной текстурой моти и мягким кокосовым вкусом.
+  ingredients:
+  - рисове тісто
+  - кокос
+  - крем
+  tags:
+  - dessert
+  - sweet
+  - coconut
+  - light
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - milk
+  pair_with:
+    ua: чай жасмин
+    ru: чай жасмин
+  available: true
+- id: banana-tempura
+  category: desserts
+  name:
+    ua: Банан у темпурі
+    ru: Банан в темпуре
+  description_short:
+    ua: Теплий десерт з бананом у хрусткому клярі.
+    ru: Тёплый десерт с бананом в хрустящем кляре.
+  description_full:
+    ua: Солодкий теплий десерт із контрастом хрусткої скоринки та м’якої бананової серединки.
+    ru: Сладкий тёплый десерт с контрастом хрустящей корочки и мягкой банановой серединки.
+  ingredients:
+  - банан
+  - кляр
+  - олія
+  - цукрова пудра
+  tags:
+  - dessert
+  - banana
+  - warm
+  - crispy
+  - sweet
+  spice_level: 0
+  is_vegetarian: true
+  allergens:
+  - gluten
+  - egg
+  pair_with:
+    ua: матча лате
+    ru: матча латте
+  available: true
+- id: jasmine-tea
+  category: drinks
+  name:
+    ua: Жасминовий чай
+    ru: Жасминовый чай
+  description_short:
+    ua: Ароматний чай з ніжними квітковими нотами жасмину.
+    ru: Ароматный чай с нежными цветочными нотами жасмина.
+  description_full:
+    ua: Класичний напій, який добре доповнює роли, супи та десерти.
+    ru: Классический напиток, который хорошо дополняет роллы, супы и десерты.
+  ingredients:
+  - чай жасмин
+  tags:
+  - drink
+  - tea
+  - jasmine
+  - warm
+  - light
+  spice_level: 0
+  is_vegetarian: true
+  allergens: []
+  pair_with:
+    ua: роли або моті
+    ru: роллы или моти
+  available: true
+- id: yuzu-lemonade
+  category: drinks
+  name:
+    ua: Юдзу-лимонад
+    ru: Юдзу-лимонад
+  description_short:
+    ua: Освіжаючий цитрусовий напій з яскравим смаком юдзу.
+    ru: Освежающий цитрусовый напиток с ярким вкусом юдзу.
+  description_full:
+    ua: Легкий прохолодний напій з цитрусовою кислинкою, добре пасує до гострих страв.
+    ru: Лёгкий прохладительный напиток с цитрусовой кислинкой, хорошо подходит к острым блюдам.
+  ingredients:
+  - юдзу сироп
+  - вода
+  - лід
+  - лимон
+  tags:
+  - drink
+  - lemonade
+  - citrus
+  - cold
+  - refreshing
+  spice_level: 0
+  is_vegetarian: true
+  allergens: []
+  pair_with:
+    ua: том ям або гострі роли
+    ru: том ям или острые роллы
+  available: true

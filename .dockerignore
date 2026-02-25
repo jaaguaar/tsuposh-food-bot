@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+htmlcov/
+*.coverage
+.coverage.*
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local config / secrets
+.env
+.env.*
+!.env.example
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tests / local artifacts (optional)
+tests/
+*.log
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Archives
+*.zip

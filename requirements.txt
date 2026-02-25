@@ -1,0 +1,7 @@
+aiogram>=3.25.0
+python-dotenv>=1.0.1
+pydantic>=2.12,<3.0
+pydantic-settings>=2.12,<3.0
+PyYAML>=6.0.2
+
+openai>=1.75.0
