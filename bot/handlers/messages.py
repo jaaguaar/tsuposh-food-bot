@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+import re
 from collections import defaultdict
 from contextlib import asynccontextmanager
 
@@ -22,6 +23,23 @@ from bot.fsm.session import (
     set_last_recommendations,
     set_preferences,
     set_user_language,
+    # new reco flow helpers
+    reset_reco_flow,
+    get_reco_seed_text,
+    set_reco_seed_text,
+    get_reco_round,
+    set_reco_round,
+    get_reco_candidates,
+    set_reco_candidates,
+    get_reco_filters,
+    set_reco_filters,
+    get_reco_last_clarify,
+    set_reco_last_clarify,
+    get_history_last_request,
+    set_history_last_request,
+    get_reco_shown_category_options,
+    get_reco_shown_property_options,
+    add_reco_shown_options,
 )
 from bot.fsm.states import FoodBotStates
 from bot.menu.loader import load_menu
@@ -123,6 +141,215 @@ def _build_menu_overview_text(language: str) -> str:
     return "\n".join(lines)
 
 
+
+# --- Clarification-limited recommendation flow helpers ---
+
+_CATEGORY_LABELS = {
+    "soups": {"ua": "Супи", "ru": "Супы"},
+    "noodles": {"ua": "Локшина", "ru": "Лапша"},
+    "rice": {"ua": "Рис / боули", "ru": "Рис / боулы"},
+    "wok": {"ua": "Вок", "ru": "Вок"},
+    "sushi_rolls": {"ua": "Роли", "ru": "Роллы"},
+    "snacks": {"ua": "Закуски", "ru": "Закуски"},
+    "desserts": {"ua": "Десерти", "ru": "Десерты"},
+    "drinks": {"ua": "Напої", "ru": "Напитки"},
+}
+
+_PROPERTY_LABELS = {
+    "spicy": {"ua": "гостре", "ru": "острое"},
+    "not_spicy": {"ua": "не гостре", "ru": "не острое"},
+    "chicken": {"ua": "з куркою", "ru": "с курицей"},
+    "beef": {"ua": "з яловичиною", "ru": "с говядиной"},
+    "seafood": {"ua": "з морепродуктами", "ru": "с морепродуктами"},
+    "vegetarian": {"ua": "вегетаріанське", "ru": "вегетарианское"},
+    "sweet": {"ua": "солодке", "ru": "сладкое"},
+}
+
+def _label_category(cat: str, lang: str) -> str:
+    return _CATEGORY_LABELS.get(cat, {}).get(lang, cat)
+
+def _label_property(prop: str, lang: str) -> str:
+    return _PROPERTY_LABELS.get(prop, {}).get(lang, prop)
+
+def _build_manager_clarify_question(
+    lang: str,
+    seed_text: str,
+    category_options: list[str],
+    property_options: list[str],
+    current_filters: dict | None = None,
+) -> tuple[str, str | None]:
+    """Build ONE short, conversational clarification question with numbered options.
+
+    Returns: (question_text, asked_type) where asked_type is 'category' or 'property'.
+    """
+    current_filters = dict(current_filters or {})
+    wanted_cats = {str(x).lower() for x in (current_filters.get("wanted_categories") or [])}
+    wanted_props = {str(x).lower() for x in (current_filters.get("wanted_properties") or [])}
+    excluded_props = {str(x).lower() for x in (current_filters.get("not_properties") or [])}
+
+    # Remove contradictory/duplicate props from suggestions
+    def _is_contradictory(p: str) -> bool:
+        p = str(p).lower().strip()
+        if "spicy" in wanted_props and p == "not_spicy":
+            return True
+        if "not_spicy" in wanted_props and p == "spicy":
+            return True
+        if p in excluded_props:
+            return True
+        if p in wanted_props:
+            return True
+        return False
+
+    safe_props = [p for p in (property_options or []) if not _is_contradictory(p)]
+
+    # Decide what to ask now: category first (if not chosen yet), then properties.
+    asked: str | None = None
+    if category_options and not wanted_cats:
+        asked = "category"
+    elif safe_props:
+        asked = "property"
+    elif category_options:
+        asked = "category"
+
+    # A tiny reminder to keep it chatty (but no re-asking)
+    preface: list[str] = []
+    if "spicy" in wanted_props:
+        preface.append("Ок, беру гостре 🔥" if lang == "ua" else "Ок, беру острое 🔥")
+    if "not_spicy" in wanted_props:
+        preface.append("Ок, беру не гостре 🙂" if lang == "ua" else "Ок, беру не острое 🙂")
+
+    # Build one question with up to 3 options
+    lines: list[str] = []
+    if asked == "category":
+        opts = list(category_options or [])[:3]
+        if lang == "ua":
+            lines.append("Щоб підібрати точніше, що тобі ближче?")
+        else:
+            lines.append("Чтобы подобрать точнее, что вам ближе?")
+        for i, c in enumerate(opts, start=1):
+            lines.append(f"{i}) {_label_category(c, lang)}")
+        if lang == "ua":
+            lines.append("Напиши номер або назву. Якщо хочеш інше — напиши «інше».")
+        else:
+            lines.append("Напишите номер или название. Если хотите другое — напишите «другое».")
+    elif asked == "property":
+        opts = list(safe_props or [])[:3]
+        if lang == "ua":
+            lines.append("Ок 🙂 А що з цього додати/уточнити?")
+        else:
+            lines.append("Ок 🙂 А что из этого добавить/уточнить?")
+        for i, p in enumerate(opts, start=1):
+            lines.append(f"{i}) {_label_property(p, lang)}")
+        if lang == "ua":
+            lines.append("Напиши номер(и) або слово. Якщо нічого — напиши «неважливо».")
+        else:
+            lines.append("Напишите номер(а) или слово. Если ничего — напишите «неважно».")
+    else:
+        # Fallback (should be rare)
+        if lang == "ua":
+            lines.append("Підкажи, будь ласка, трохи більше деталей 🙂")
+        else:
+            lines.append("Подскажите, пожалуйста, чуть больше деталей 🙂")
+
+    question = "\n".join([*preface, *lines]).strip()
+    return question, asked
+
+def _parse_clarify_answer(text: str, lang: str, category_options: list[str], property_options: list[str], asked: str | None = None) -> dict:
+    """Parse user's reply to a clarification question into filters delta."""
+    q = (text or "").lower()
+    delta = {
+        "wanted_categories": [],
+        "not_categories": [],
+        "wanted_properties": [],
+        "not_properties": [],
+        "required_properties": [],
+        "spice_max": None,
+        "vegetarian": None,
+    }
+
+    
+    # numeric answers support (e.g. "1" or "1 3")
+    numbers = [int(n) for n in re.findall(r"\b\d+\b", q)]
+# category selection
+    if category_options:
+        selected = _extract_category_options_from_clarify(text, category_options)
+        if selected:
+            delta["wanted_categories"] = [selected]
+        elif _reply_is_other_choice(text, lang):
+            delta["not_categories"] = list(category_options)
+
+    
+    # property selection by numbers (only if we asked properties)
+    if property_options and numbers and asked == "property":
+        for n in numbers:
+            if 1 <= n <= len(property_options):
+                p = property_options[n - 1]
+                delta["wanted_properties"].append(p)
+                delta["required_properties"].append(p)
+# properties: simple keyword matching
+    for prop in property_options or []:
+        label = _label_property(prop, lang)
+        if label and label in q:
+            delta["wanted_properties"].append(prop)
+            delta["required_properties"].append(prop)
+
+    
+    if any(x in q for x in ["неважливо", "не важно", "неважно", "байдуже", "все одно"]):
+        # user doesn't want to add extra constraints
+        delta["wanted_properties"] = []
+        delta["required_properties"] = []
+        delta["wanted_categories"] = delta.get("wanted_categories") or []
+# extra synonyms
+    if any(x in q for x in ["не гостре", "неостро", "не остро"]):
+        delta["wanted_properties"].append("not_spicy")
+        delta["required_properties"].append("not_spicy")
+        delta["spice_max"] = 1
+    if any(x in q for x in ["гостре", "остро"]):
+        delta["wanted_properties"].append("spicy")
+        delta["required_properties"].append("spicy")
+    if any(x in q for x in ["вегет", "без мяса", "без м'яса", "без мʼяса"]):
+        delta["wanted_properties"].append("vegetarian")
+        delta["required_properties"].append("vegetarian")
+        delta["vegetarian"] = True
+
+    # de-duplicate
+    delta["wanted_properties"] = list(dict.fromkeys(delta["wanted_properties"]))
+    delta["required_properties"] = list(dict.fromkeys(delta["required_properties"]))
+    return delta
+
+def _merge_reco_filters(base: dict, delta: dict) -> dict:
+    result = dict(base or {})
+    for key in ["wanted_categories", "not_categories", "wanted_properties", "not_properties", "required_properties", "avoid_ingredients"]:
+        merged = []
+        for item in (result.get(key) or []) + (delta.get(key) or []):
+            if item not in merged:
+                merged.append(item)
+        if merged:
+            result[key] = merged
+        else:
+            result.pop(key, None)
+    if delta.get("spice_max") is not None:
+        result["spice_max"] = delta["spice_max"]
+    if delta.get("vegetarian") is True:
+        result["vegetarian"] = True
+    
+    if "with_rice" in delta and delta.get("with_rice") is not None:
+        result["with_rice"] = bool(delta.get("with_rice"))
+    return result
+
+def _summarize_request_for_history(lang: str, filters: dict) -> str:
+    cats = [_label_category(c, lang) for c in (filters.get("wanted_categories") or [])]
+    props = [_label_property(p, lang) for p in (filters.get("wanted_properties") or [])]
+    parts = []
+    if props:
+        parts.append(", ".join(props))
+    if cats:
+        parts.append(("з " if lang == "ua" else "из ") + ", ".join(cats))
+    if not parts:
+        return "щось смачне" if lang == "ua" else "что-то вкусное"
+    return " ".join(parts)
+
+
 def _merge_preferences(base: dict | None, extra: dict | None) -> dict:
     result = dict(base or {})
     for k, v in (extra or {}).items():
@@ -147,6 +374,67 @@ def _norm(s: str) -> str:
 
 
 
+
+
+def _map_protein_to_property(value: str | None) -> str | None:
+    """Map free-form UA/RU protein mentions to our canonical property tokens.
+    Canonical tokens are the same ones used in menu tags and ExpertAgent filtering.
+    """
+    if not value:
+        return None
+    v = _norm(value)
+    # chicken
+    if any(x in v for x in ["курка", "курицу", "курица", "куряч", "chicken"]):
+        return "chicken"
+    # beef
+    if any(x in v for x in ["ялович", "говядин", "beef"]):
+        return "beef"
+    # seafood / fish
+    if any(x in v for x in ["риба", "рыба", "лосос", "сьомг", "семг", "тунец", "тунець", "кревет", "креветк", "shrimp", "fish", "seafood"]):
+        return "seafood"
+    # tofu
+    if any(x in v for x in ["тофу", "tofu"]):
+        return "tofu"
+    return None
+
+
+def _looks_like_greeting(text: str) -> bool:
+    t = _norm(text)
+    return bool(re.search(r"\b(привіт|добрий\s*(день|вечір|ранок)?|хай|hello|hi|hey|здрастуй|здравствуйте)\b", t))
+
+def _looks_like_thanks_or_bye(text: str) -> bool:
+    t = _norm(text)
+    return bool(re.search(r"\b(дякую|спасиб(і|о)?|thx|thanks|thank\s+you|пока|пака|бувай|до\s+побачення|goodbye|bye)\b", t))
+
+def _detect_category_in_text(text: str, lang: str) -> str | None:
+    t = _norm(text)
+    # try by localized labels first
+    for key, labels in _CATEGORY_LABELS.items():
+        lab = (labels.get(lang) or "").lower()
+        if lab and lab in t:
+            return key
+    # fallback: common UA/RU keywords
+    keywords = {
+        "soups": ["суп", "супи", "супы"],
+        "rice": ["рис", "боул", "боулы", "боулi", "боули"],
+        "wok": ["вок"],
+        "noodles": ["локшина", "лапша", "удон", "рамен"],
+        "sushi_rolls": ["роли", "роллы", "суші", "суши"],
+        "snacks": ["закуск", "стартер"],
+        "desserts": ["десерт", "солодке", "сладкое"],
+        "drinks": ["напої", "напитки", "пити", "пить", "чай", "кава", "кофе"],
+    }
+    for key, words in keywords.items():
+        if any(w in t for w in words):
+            return key
+    return None
+
+def _looks_like_show_category_request(text: str, lang: str) -> str | None:
+    t = _norm(text)
+    # "show all" / "list" patterns
+    if not re.search(r"(покажи|покаж|виведи|дай|переліч|список|всі|усі|весь|все|хочу\s+подивитись|хочу\s+бачити|покажи\s+меню)", t):
+        return None
+    return _detect_category_in_text(t, lang)
 
 def _normalize_dish_name_text(s: str) -> str:
     s = (s or "").lower().replace("’", "'")
@@ -280,57 +568,106 @@ async def handle_text_message(message: Message, state: FSMContext) -> None:
     current_state = await state.get_state()
 
     if current_state == FoodBotStates.clarifying_recommendation.state:
-        session_data = await get_session_data(state)
-        session_lang = session_data.get("language", current_language)
-        existing_prefs = session_data.get("preferences", {}) or {}
+        session_lang = await get_user_language(state)
+        seed_text = await get_reco_seed_text(state)
+        reco_round = await get_reco_round(state)
+        reco_filters = await get_reco_filters(state)
+        reco_candidates = await get_reco_candidates(state)
+        last_clarify = await get_reco_last_clarify(state)
 
-        async with _user_processing_guard(message, session_lang) as can_process:
-            if not can_process:
+        # Stage: final step - restart or one relaxed retry (after 3 clarifications)
+        if reco_filters.get("_final_stage") is True:
+            t = _norm(text)
+
+            if t in {"спочатку", "сначала", "заново", "з початку", "заново"}:
+                await reset_reco_flow(state)
+                await message.answer("Ок, починаємо з початку 🙂" if session_lang == "ua" else "Ок, начнем сначала 🙂")
+                # Re-run as a new message
+                await handle_text_message(message, state)
                 return
-            async with _typing(message):
-                followup_decision = await MANAGER_AGENT.analyze_message(text)
 
-        merged_prefs = _merge_preferences(existing_prefs, followup_decision.extracted_preferences.model_dump())
-
-        # Handle explicit category selection from previous clarify question (including "other")
-        last_cat_options = await get_last_clarify_category_options(state)
-        selected_cat = _extract_category_options_from_clarify(text, last_cat_options)
-        if selected_cat:
-            merged_prefs["category"] = selected_cat
-            merged_prefs.pop("_exclude_categories", None)
-        elif last_cat_options and _reply_is_other_choice(text, session_lang):
-            merged_prefs.pop("category", None)
-            merged_prefs["_exclude_categories"] = list(last_cat_options)
-
-        # Preserve language chosen for the dialog, unless user clearly switched and manager detected it.
-        session_lang = followup_decision.language or session_lang
-        await set_user_language(state, session_lang)
-        await set_preferences(state, merged_prefs)
-
-        if followup_decision.intent == "off_topic":
-            await state.set_state(FoodBotStates.clarifying_recommendation)
-            await message.answer(followup_decision.reply_text)
-            return
-
-        async with _user_processing_guard(message, session_lang) as can_process:
-            if not can_process:
-                return
-            async with _typing(message):
-                expert_result = await EXPERT_AGENT.recommend(_expert_input_from_prefs(session_lang, text, merged_prefs))
-
-        if not expert_result.items:
-            # If still nothing found, keep clarifying instead of ending up in a dead-end.
-            await state.set_state(FoodBotStates.clarifying_recommendation)
-            if followup_decision.needs_clarification or followup_decision.clarifying_question:
-                await set_last_clarify_category_options(state, _extract_category_options_from_clarify(followup_decision.clarifying_question))
-                await _reply_manager_with_optional_clarification(message, followup_decision.reply_text, followup_decision.clarifying_question)
+            if t in {"ще раз", "еще раз", "ще", "еще", "спробувати ще", "попробовать еще", "м'якше", "мягче", "продовжити", "продолжить"}:
+                # One more attempt, but less strict filtering
+                reco_filters.pop("_final_stage", None)
+                reco_filters["_relaxed"] = True
+                await set_reco_filters(state, reco_filters)
             else:
-                await message.answer(expert_result.intro_text)
+                await message.answer(
+                    ("Не знайшов точного варіанту після 3 уточнень. Напиши: «спочатку» (почати з нуля) або «ще раз» (спробувати менш жорстко)." if session_lang == "ua"
+                     else "Не нашёл точный вариант после 3 уточнений. Напишите: «сначала» (начать заново) или «еще раз» (попробовать мягче).")
+                )
+                return
+
+        # Parse user's clarification answer and update filters and update filters
+        delta = _parse_clarify_answer(
+            text,
+            session_lang,
+            category_options=list(last_clarify.get("category_options") or []),
+            property_options=list(last_clarify.get("property_options") or []),
+            asked=last_clarify.get("asked"),
+        )
+        reco_filters = _merge_reco_filters(reco_filters, delta)
+        await set_reco_filters(state, reco_filters)
+
+        async with _user_processing_guard(message, session_lang) as can_process:
+            if not can_process:
+                return
+            async with _typing(message):
+                expert_result = await EXPERT_AGENT.recommend_with_clarification(
+                    language=session_lang,
+                    seed_text=seed_text or text,
+                    filters=reco_filters,
+                    candidate_dish_ids=reco_candidates,
+                    round_index=reco_round,
+                )
+
+        if expert_result.mode == "clarify":
+            # Save expert candidate pool and new clarify options
+            await set_reco_candidates(state, expert_result.candidate_dish_ids)
+            clar = expert_result.clarification
+            cat_opts = list(getattr(clar, "category_options", []) or [])
+            prop_opts = list(getattr(clar, "property_options", []) or [])
+
+            # Avoid repeating the same options across rounds
+            shown_cats = set(await get_reco_shown_category_options(state))
+            shown_props = set(await get_reco_shown_property_options(state))
+            cat_opts = [c for c in cat_opts if c not in shown_cats]
+            prop_opts = [p for p in prop_opts if p not in shown_props]
+            await set_reco_last_clarify(state, cat_opts, prop_opts, asked)
+
+            # Clarification limit reached (3 rounds). Offer restart or one relaxed retry.
+            if reco_round >= 3:
+                reco_filters["_final_stage"] = True
+                await set_reco_filters(state, reco_filters)
+                await message.answer(
+                    ("Після 3 уточнень я все ще не бачу точного варіанту 😕\nНапиши: «спочатку» (почати з нуля) або «ще раз» (спробувати менш жорстко)." if session_lang == "ua"
+                     else "После 3 уточнений я всё ещё не вижу точного варианта 😕\nНапишите: «сначала» (начать заново) или «еще раз» (попробовать мягче).")
+                )
+                return
+
+            await set_reco_round(state, reco_round + 1)
+            question, asked = _build_manager_clarify_question(session_lang, seed_text or "", cat_opts, prop_opts, reco_filters)
+            await set_reco_last_clarify(state, cat_opts, prop_opts, asked)
+
+            # Remember shown options so we don't repeat them next round
+            if asked == "category":
+                await add_reco_shown_options(state, categories=cat_opts[:3])
+            elif asked == "property":
+                await add_reco_shown_options(state, properties=prop_opts[:3])
+            await _reply_manager_with_optional_clarification(message, expert_result.intro_text, question)
             return
 
+        # Got final recommendations
         await state.set_state(FoodBotStates.showing_recommendations)
         await _send_expert_recommendations(message, expert_result)
         await set_last_recommendations(state, [x.dish_id for x in expert_result.items])
+
+        # Move last request into simple history
+        summary = _summarize_request_for_history(session_lang, reco_filters)
+        await set_history_last_request(state, summary)
+
+        # Reset recommendation flow state
+        await reset_reco_flow(state)
         await set_last_clarify_category_options(state, [])
         return
 
@@ -346,23 +683,153 @@ async def handle_text_message(message: Message, state: FSMContext) -> None:
 
     logger.info("Manager decision | intent=%s lang=%s clarify=%s confidence=%.2f dish_query=%s prefs=%s", decision.intent, decision.language, decision.needs_clarification, decision.confidence, decision.dish_query, decision.extracted_preferences.model_dump())
 
-    if decision.intent == "recommendation_request" and not decision.needs_clarification:
-        await state.set_state(FoodBotStates.showing_recommendations)
+
+
+    # If user explicitly wants to see the full menu of a category, show it directly (cards)
+    cat_key = _looks_like_show_category_request(text, decision.language)
+    if cat_key:
         async with _user_processing_guard(message, decision.language) as can_process:
             if not can_process:
                 return
             async with _typing(message):
-                expert_result = await EXPERT_AGENT.recommend(_expert_input_from_prefs(decision.language, text, decision.extracted_preferences.model_dump()))
+                expert_result = await EXPERT_AGENT.list_category(
+                    language=decision.language,
+                    category=cat_key,
+                )
+        await state.set_state(FoodBotStates.showing_recommendations)
         await _send_expert_recommendations(message, expert_result)
         await set_last_recommendations(state, [x.dish_id for x in expert_result.items])
-        await set_last_clarify_category_options(state, [])
         return
 
-    if decision.intent == "recommendation_request" and decision.needs_clarification:
-        await state.set_state(FoodBotStates.clarifying_recommendation)
-        cat_options = _extract_category_options_from_clarify(decision.clarifying_question)
-        await set_last_clarify_category_options(state, cat_options)
-        await _reply_manager_with_optional_clarification(message, decision.reply_text, decision.clarifying_question)
+
+
+    if decision.intent == "recommendation_request":
+        # Start / continue clarification-limited flow (expert decides when to narrow).
+        existing_seed = await get_reco_seed_text(state)
+        await set_reco_seed_text(state, existing_seed or text)
+        seed_text = await get_reco_seed_text(state)
+        await set_reco_round(state, 0)
+
+        # If this is a new recommendation session, we may reference last request memory
+        last_mem = await get_history_last_request(state)
+        if last_mem and not existing_seed:
+            if decision.language == "ru":
+                decision.reply_text = f"{decision.reply_text}\n\nКстати, в прошлый раз вы искали: {last_mem}. Могу подобрать что-то похожее или новое 🙂"
+            else:
+                decision.reply_text = f"{decision.reply_text}\n\nДо речі, минулого разу ти шукав(ла): {last_mem}. Можу підібрати щось схоже або новеньке 🙂"
+
+        # Initialize filters from manager extracted prefs (best-effort)
+        filters: dict = {}
+
+        # Quick keyword bootstrap (covers cases when manager prefs extraction misses it)
+        seed_norm = _norm(seed_text or "")
+        if "не гостр" in seed_norm or "неостр" in seed_norm or "не ост" in seed_norm:
+            filters.setdefault("wanted_properties", [])
+            if "not_spicy" not in filters["wanted_properties"]:
+                filters["wanted_properties"].append("not_spicy")
+            filters.setdefault("not_properties", [])
+            if "spicy" not in filters["not_properties"]:
+                filters["not_properties"].append("spicy")
+        elif "гостр" in seed_norm or "остр" in seed_norm:
+            filters.setdefault("wanted_properties", [])
+            if "spicy" not in filters["wanted_properties"]:
+                filters["wanted_properties"].append("spicy")
+            filters.setdefault("not_properties", [])
+            if "not_spicy" not in filters["not_properties"]:
+                filters["not_properties"].append("not_spicy")
+
+        
+        # Carb / staple keyword bootstrap (example: rice). This helps when manager extraction misses it.
+        if "рис" in seed_norm or "rice" in seed_norm:
+            filters["with_rice"] = True
+        if "без рис" in seed_norm or "безрис" in seed_norm:
+            filters["with_rice"] = False
+        prefs = decision.extracted_preferences.model_dump()
+        if prefs.get("category"):
+            filters["wanted_categories"] = [prefs["category"]]
+        if prefs.get("vegetarian") is True:
+            filters["vegetarian"] = True
+            filters["wanted_properties"] = ["vegetarian"]
+        if prefs.get("protein"):
+            p = _map_protein_to_property(str(prefs["protein"]))
+            if p:
+                filters.setdefault("wanted_properties", [])
+                if p not in filters["wanted_properties"]:
+                    filters["wanted_properties"].append(p)
+                filters.setdefault("required_properties", [])
+                if p not in filters["required_properties"]:
+                    filters["required_properties"].append(p)
+        if prefs.get("spice_level"):
+            val = str(prefs["spice_level"]).lower()
+            if val in {"low", "mild"}:
+                filters["spice_max"] = 1
+                filters.setdefault("wanted_properties", [])
+                if "not_spicy" not in filters["wanted_properties"]:
+                    filters["wanted_properties"].append("not_spicy")
+                filters.setdefault("required_properties", [])
+                if "not_spicy" not in filters["required_properties"]:
+                    filters["required_properties"].append("not_spicy")
+            if val in {"high", "hot"}:
+                filters.setdefault("wanted_properties", [])
+                if "spicy" not in filters["wanted_properties"]:
+                    filters["wanted_properties"].append("spicy")
+                filters.setdefault("required_properties", [])
+                if "spicy" not in filters["required_properties"]:
+                    filters["required_properties"].append("spicy")
+        if prefs.get("avoid_ingredients"):
+            filters["avoid_ingredients"] = list(prefs.get("avoid_ingredients") or [])
+
+        await set_reco_filters(state, filters)
+        await set_reco_candidates(state, [])
+        await set_reco_last_clarify(state, [], [])
+
+        async with _user_processing_guard(message, decision.language) as can_process:
+            if not can_process:
+                return
+            async with _typing(message):
+                expert_result = await EXPERT_AGENT.recommend_with_clarification(
+                    language=decision.language,
+                    seed_text=seed_text or text,
+                    filters=filters,
+                    candidate_dish_ids=[],
+                    round_index=0,
+                )
+
+        if expert_result.mode == "clarify":
+            await state.set_state(FoodBotStates.clarifying_recommendation)
+            await set_reco_candidates(state, expert_result.candidate_dish_ids)
+
+            clar = expert_result.clarification
+            cat_opts = list(getattr(clar, "category_options", []) or [])
+            prop_opts = list(getattr(clar, "property_options", []) or [])
+
+            # Avoid repeating the same options across rounds
+            shown_cats = set(await get_reco_shown_category_options(state))
+            shown_props = set(await get_reco_shown_property_options(state))
+            cat_opts = [c for c in cat_opts if c not in shown_cats]
+            prop_opts = [p for p in prop_opts if p not in shown_props]
+            await set_reco_round(state, 1)
+
+            question, asked = _build_manager_clarify_question(decision.language, seed_text or "", cat_opts, prop_opts, filters)
+            await set_reco_last_clarify(state, cat_opts, prop_opts, asked)
+
+            # Remember shown options so we don't repeat them next round
+            if asked == "category":
+                await add_reco_shown_options(state, categories=cat_opts[:3])
+            elif asked == "property":
+                await add_reco_shown_options(state, properties=prop_opts[:3])
+            # Keep manager tone
+            await _reply_manager_with_optional_clarification(message, decision.reply_text or expert_result.intro_text, question)
+            return
+
+        await state.set_state(FoodBotStates.showing_recommendations)
+        await _send_expert_recommendations(message, expert_result)
+        await set_last_recommendations(state, [x.dish_id for x in expert_result.items])
+
+        summary = _summarize_request_for_history(decision.language, filters)
+        await set_history_last_request(state, summary)
+        await reset_reco_flow(state)
+        await set_last_clarify_category_options(state, [])
         return
 
     if decision.intent == "menu_availability":
@@ -437,5 +904,17 @@ async def handle_text_message(message: Message, state: FSMContext) -> None:
         await _reply_manager_with_optional_clarification(message, decision.reply_text, fallback_q)
         return
 
+
+
+    
+
+    # Friendly memory: remind last request only when user greets (not on thanks/bye)
+    if decision.intent == "smalltalk":
+        last = await get_history_last_request(state)
+        if last and _looks_like_greeting(text) and not _looks_like_thanks_or_bye(text):
+            if decision.language == "ru":
+                decision.reply_text = f"{decision.reply_text}\n\nКстати, в прошлый раз вы искали: {last}. Хотите что-то похожее или попробуем новое?"
+            else:
+                decision.reply_text = f"{decision.reply_text}\n\nДо речі, минулого разу ти шукав(ла): {last}. Хочеш щось схоже чи спробуємо новеньке?"
     await state.set_state(FoodBotStates.idle)
     await _reply_manager_with_optional_clarification(message, decision.reply_text, decision.clarifying_question if decision.needs_clarification else None)
