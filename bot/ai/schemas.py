@@ -53,12 +53,26 @@ class ExpertRecommendationItem(BaseModel):
     reason: str = Field(min_length=1, max_length=220)
 
 
+
+class ExpertClarification(BaseModel):
+    # Internal tokens for options the manager can ask about
+    category_options: list[str] = Field(default_factory=list)
+    property_options: list[str] = Field(default_factory=list)  # e.g. spicy, not_spicy, chicken, seafood, vegetarian
+
+    # Optional short hints for the manager (not shown directly unless desired)
+    notes: str | None = None
+
+
 class ExpertDecision(BaseModel):
     language: Literal["ua", "ru"] = "ua"
-    mode: Literal["recommendation", "analogs", "not_found"] = "recommendation"
+    mode: Literal["recommendation", "analogs", "not_found", "clarify"] = "recommendation"
 
     intro_text: str = Field(min_length=1)
     items: list[ExpertRecommendationItem] = Field(default_factory=list)
+
+    # For clarification-driven recommendation flow
+    clarification: ExpertClarification | None = None
+    candidate_dish_ids: list[str] = Field(default_factory=list)
 
     # If user asked about a specific dish
     requested_dish_query: str | None = None
