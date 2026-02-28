@@ -2,8 +2,7 @@ name: Build and Deploy Telegram Bot to Azure Container Apps
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -13,15 +12,15 @@ permissions:
 env:
   RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
   CONTAINER_APP_NAME: ${{ vars.AZURE_CONTAINER_APP_NAME }}
-  CONTAINER_APP_ENVIRONMENT: ${{ vars.AZURE_CONTAINER_APP_ENV_NAME }}
   ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+  IMAGE_REPO: tsuposh-food-bot
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     concurrency:
-      group: deploy-containerapp-prod
+      group: deploy-containerapp-dev
       cancel-in-progress: true
 
     steps:
@@ -35,13 +34,33 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and Deploy to Azure Container Apps
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          appSourcePath: ${{ github.workspace }}
-          dockerfilePath: Dockerfile
-          acrName: ${{ env.ACR_NAME }}
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: ${{ env.CONTAINER_APP_NAME }}
-          containerAppEnvironment: ${{ env.CONTAINER_APP_ENVIRONMENT }}
-          imageToBuild: ${{ env.ACR_NAME }}.azurecr.io/tsuposh-food-bot:${{ github.sha }}
+      - name: Read VERSION
+        id: ver
+        run: |
+          test -f VERSION || (echo "VERSION file is missing" && exit 1)
+          VER=$(cat VERSION | tr -d ' \n\r')
+          echo "$VER" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' >/dev/null || (echo "Invalid VERSION: $VER" && exit 1)
+          echo "version=$VER" >> $GITHUB_OUTPUT
+
+      - name: ACR Login
+        run: |
+          az acr login -n "${ACR_NAME}"
+
+      - name: Build image
+        run: |
+          IMAGE="${ACR_NAME}.azurecr.io/${IMAGE_REPO}"
+          docker build -t "${IMAGE}:${{ steps.ver.outputs.version }}" -t "${IMAGE}:latest" .
+
+      - name: Push image
+        run: |
+          IMAGE="${ACR_NAME}.azurecr.io/${IMAGE_REPO}"
+          docker push "${IMAGE}:${{ steps.ver.outputs.version }}"
+          docker push "${IMAGE}:latest"
+
+      - name: Deploy to Container App (new revision)
+        run: |
+          IMAGE="${ACR_NAME}.azurecr.io/${IMAGE_REPO}:${{ steps.ver.outputs.version }}"
+          az containerapp update \
+            -g "${RESOURCE_GROUP}" \
+            -n "${CONTAINER_APP_NAME}" \
+            --image "${IMAGE}"
