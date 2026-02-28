@@ -272,11 +272,17 @@ def _parse_clarify_answer(text: str, lang: str, category_options: list[str], pro
     numbers = [int(n) for n in re.findall(r"\b\d+\b", q)]
 # category selection
     if category_options:
-        selected = _extract_category_options_from_clarify(text, category_options)
-        if selected:
-            delta["wanted_categories"] = [selected]
-        elif _reply_is_other_choice(text, lang):
-            delta["not_categories"] = list(category_options)
+        # If manager asked for a category, allow numeric selection (e.g. '2')
+        if numbers and asked == "category":
+            n = numbers[0]
+            if 1 <= n <= len(category_options):
+                delta["wanted_categories"] = [category_options[n - 1]]
+        else:
+            selected = _extract_category_options_from_clarify(text, category_options)
+            if selected:
+                delta["wanted_categories"] = [selected]
+            elif _reply_is_other_choice(text, lang):
+                delta["not_categories"] = list(category_options)
 
     
     # property selection by numbers (only if we asked properties)
@@ -633,7 +639,6 @@ async def handle_text_message(message: Message, state: FSMContext) -> None:
             shown_props = set(await get_reco_shown_property_options(state))
             cat_opts = [c for c in cat_opts if c not in shown_cats]
             prop_opts = [p for p in prop_opts if p not in shown_props]
-            await set_reco_last_clarify(state, cat_opts, prop_opts, asked)
 
             # Clarification limit reached (3 rounds). Offer restart or one relaxed retry.
             if reco_round >= 3:
